@@ -99,14 +99,16 @@ def shutdown_horcm_instance(horcm_instance, path, os_type):
     logger.info("Function execution started")
     start_time = time.time()
     horcm_file_full_path = path + "\\" + "horcm" + horcm_instance + ".conf"
-    os.environ['HORCM_CONF'] = horcm_file_full_path
-    os.environ['HORCMINST'] = horcm_instance
+    # os.environ['HORCM_CONF'] = horcm_file_full_path
+    # os.environ['HORCMINST'] = horcm_instance
     os.environ['HORCM_EVERYCLI'] = "1"
     if os_type == "win32":
-        subprocess.run(["horcmshutdown"])
+        subprocess.run(["horcmshutdown",  horcm_instance])
     elif os_type == "linux":
-        subprocess.run(["horcmshutdown.sh"])
-
+        subprocess.run(["horcmshutdown.sh",  horcm_instance])
+    logger.info(f"Waiting 10 sec.")
+    time.sleep(10)
+    logger.info(f"Done waiting 10 sec.")
     end_time = time.time()
     execution_time = end_time - start_time
     logger.info(f"The function took {execution_time} seconds to execute.")
@@ -120,14 +122,16 @@ def start_horcm_instance(horcm_instance, path, os_type):
     except:
         logger.info("Could not shutdown HORCM instance, might be down already")
     horcm_file_full_path = path + "horcm" + horcm_instance + ".conf"
-    os.environ['HORCM_CONF'] = horcm_file_full_path
-    os.environ['HORCMINST'] = horcm_instance
+    # os.environ['HORCM_CONF'] = horcm_file_full_path
+    # os.environ['HORCMINST'] = horcm_instance
     os.environ['HORCM_EVERYCLI'] = "1"
     if os_type == "win32":
-        subprocess.run(["horcmstart"])
+        subprocess.run(["horcmstart", horcm_instance])
     elif os_type == "linux":
-        subprocess.run(["horcmstart.sh"])
+        subprocess.run(["horcmstart.sh", horcm_instance])
+    logger.info(f"Waiting 10 sec.")
     time.sleep(10)
+    logger.info(f"Done waiting 10 sec.")
     end_time = time.time()
     execution_time = end_time - start_time
     logger.info(f"The function took {execution_time} seconds to execute.")
@@ -472,7 +476,20 @@ def get_host_grp_names_of_all_ctgs(replication_remote_grouped_by_ctg, horcm_inst
     return host_grp_name_of_each_ctg
 
 
-
+def convert_0xldev_to_nekudataiim(ldev_id):
+    chars_ldev = [char for char in ldev_id]
+    if len(chars_ldev) == 1:
+        chars_ldev.insert(0, "0")
+        chars_ldev.insert(0, "0")
+        chars_ldev.insert(0, "0")
+    if len(chars_ldev) == 2:
+        chars_ldev.insert(0, "0")
+        chars_ldev.insert(0, "0")
+    if len(chars_ldev) == 3:
+        chars_ldev.insert(0, "0")
+    chars_ldev.insert(2, ":")
+    text_ldev = ''.join(chars_ldev)
+    return text_ldev
 
 
 #Write all the user input into variables
@@ -523,28 +540,20 @@ for sn in main_dict:
         for line in dict_of_pairdisplay_by_sn_and_ctg[sn][ctg]:
             mu = line[1].split("_")[-1]
             ldev_id = line[7]
+            remote_ldev_id = line[12]
             local_serial = line[6]
             remote_serial = line[11]
             replication_type = line[39]
             host_grp_name_of_each_ctg_str = '_'.join(dict_of_host_grp_name_of_each_ctg_by_sn[sn][ctg])
-            chars_ldev = [char for char in ldev_id]
-            if len(chars_ldev) == 1:
-                chars_ldev.insert(0, "0")
-                chars_ldev.insert(0, "0")
-                chars_ldev.insert(0, "0")
-            if len(chars_ldev) == 2:
-                chars_ldev.insert(0, "0")
-                chars_ldev.insert(0, "0")
-            if len(chars_ldev) == 3:
-                chars_ldev.insert(0, "0")
-            chars_ldev.insert(2, ":")
-            text_ldev = ''.join(chars_ldev)
-            horcm_ldev_data_line_local = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + local_serial + " " + text_ldev + " " + mu + " # replicated to: " + remote_serial
-            horcm_ldev_data_line_remote = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + remote_serial + " " + text_ldev + " " + mu + " # replicated from: " + local_serial
+            txt_ldev_id = convert_0xldev_to_nekudataiim(ldev_id)
+            txt_remote_ldev_id = convert_0xldev_to_nekudataiim(remote_ldev_id)
+            horcm_ldev_data_line_local = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + local_serial + " " + txt_ldev_id + " " + mu + " # replicated to: " + remote_serial
+            horcm_ldev_data_line_remote = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + remote_serial + " " + txt_remote_ldev_id + " " + mu + " # replicated from: " + local_serial
             dict_of_horcm_ldev_data_by_sn[sn].append(horcm_ldev_data_line_local)
             dict_of_horcm_ldev_data_by_sn[remote_serial].append(horcm_ldev_data_line_remote)
 
 for sn in main_dict:
+
     horcm_instp_data_tmp = []
     uniq_horcm_grp = []
     for one_horcm_ldev_data_line in dict_of_horcm_ldev_data_by_sn[sn][1:]:
