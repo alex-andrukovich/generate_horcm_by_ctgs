@@ -127,6 +127,7 @@ def start_horcm_instance(horcm_instance, path, os_type):
         subprocess.run(["horcmstart"])
     elif os_type == "linux":
         subprocess.run(["horcmstart.sh"])
+    time.sleep(10)
     end_time = time.time()
     execution_time = end_time - start_time
     logger.info(f"The function took {execution_time} seconds to execute.")
