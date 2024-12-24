@@ -85,7 +85,7 @@ def create_horcm_file(horcm_instance, path, storage_ip, udpport):
         horcm_file.write("#ip_address" + '\t' + "service" + '\t' + "poll(10ms)" + '\t' + "timeout(10ms)" + '\n')
         horcm_file.write("localhost" + '\t' + udpport + '\t' + "1000" + '\t\t' + "3000" + '\n\n\n')
         horcm_file.write("HORCM_CMD" + '\n')
-        horcm_file.write("#dev_name" + '\t' + "dev_name" + '\t' + "dev_name)" + '\t' + "dev_name" + '\n')
+        horcm_file.write("#dev_name" + '\t' + "dev_name" + '\t' + "dev_name" + '\t' + "dev_name" + '\n')
         if is_valid_ip(storage_ip):
             horcm_file.write("\\\\.\\IPCMD-" + storage_ip + "-31001" + '\n')
         else:
