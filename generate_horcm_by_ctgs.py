@@ -543,12 +543,12 @@ for sn in main_dict:
             remote_ldev_id = line[12]
             local_serial = line[6]
             remote_serial = line[11]
-            replication_type = line[39]
+            replication_type = line[46]
             host_grp_name_of_each_ctg_str = '_'.join(dict_of_host_grp_name_of_each_ctg_by_sn[sn][ctg])
             txt_ldev_id = convert_0xldev_to_nekudataiim(ldev_id)
             txt_remote_ldev_id = convert_0xldev_to_nekudataiim(remote_ldev_id)
-            horcm_ldev_data_line_local = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + local_serial + " " + txt_ldev_id + " " + mu + " # replicated to: " + remote_serial
-            horcm_ldev_data_line_remote = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + replication_type + " " + remote_serial + " " + txt_remote_ldev_id + " " + mu + " # replicated from: " + local_serial
+            horcm_ldev_data_line_local = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + remote_ldev_id + "_" + replication_type + " " + local_serial + " " + txt_ldev_id + " " + mu + " # replicated to: " + remote_serial
+            horcm_ldev_data_line_remote = "CTG_" + ctg + "_" + host_grp_name_of_each_ctg_str[:22] + " " + "ldev_" + ldev_id + "_" + mu + "_" + remote_ldev_id + "_" + replication_type + " " + remote_serial + " " + txt_remote_ldev_id + " " + mu + " # replicated from: " + local_serial
             dict_of_horcm_ldev_data_by_sn[sn].append(horcm_ldev_data_line_local)
             dict_of_horcm_ldev_data_by_sn[remote_serial].append(horcm_ldev_data_line_remote)
 
